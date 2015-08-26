@@ -11,17 +11,16 @@
 #include "bootmanager.h"
 #include "main.h"
 
-#include "common/string_util.h"
-#include "common/scm_rev.h"
 #include "common/key_map.h"
+#include "common/scm_rev.h"
 #include "common/microprofile.h"
+#include "common/string_util.h"
 
 #include "core/core.h"
 #include "core/settings.h"
 #include "core/system.h"
 
 #include "video_core/debug_utils/debug_utils.h"
-
 #include "video_core/video_core.h"
 
 #include "citra_qt/version.h"
@@ -87,6 +86,9 @@ public:
     }
 
     void paintEvent(QPaintEvent* ev) override {
+        if (do_painting) {
+            QPainter painter(this);
+        }
     }
 
     void resizeEvent(QResizeEvent* ev) override {
@@ -94,8 +96,12 @@ public:
         parent->OnFramebufferSizeChanged();
     }
 
+    void DisablePainting() { do_painting = false; }
+    void EnablePainting() { do_painting = true; }
+
 private:
     GRenderWindow* parent;
+    bool do_painting;
 };
 
 GRenderWindow::GRenderWindow(QWidget* parent, EmuThread* emu_thread) :
@@ -269,8 +275,10 @@ void GRenderWindow::OnMinimalClientAreaChangeRequest(const std::pair<unsigned,un
 
 void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {
     this->emu_thread = emu_thread;
+    child->DisablePainting();
 }
 
 void GRenderWindow::OnEmulationStopping() {
     emu_thread = nullptr;
+    child->EnablePainting();
 }
