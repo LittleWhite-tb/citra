@@ -60,18 +60,24 @@ set(UIS
             main.ui
             )
 
+set(RESOURCE
+            citra-qt.qrc
+            )
+
 create_directory_groups(${SRCS} ${HEADERS} ${UIS})
 
 if (Qt5_FOUND)
     qt5_wrap_ui(UI_HDRS ${UIS})
+    qt5_add_resources(RESOURCE_HDRS ${RESOURCE})
 else()
     qt4_wrap_ui(UI_HDRS ${UIS})
+    qt4_add_resources(RESOURCE_HDRS ${RESOURCE})
 endif()
 
 if (APPLE)
-    add_executable(citra-qt MACOSX_BUNDLE ${SRCS} ${HEADERS} ${UI_HDRS})
+    add_executable(citra-qt MACOSX_BUNDLE ${SRCS} ${HEADERS} ${UI_HDRS} ${RESOURCE_HDRS})
 else()
-    add_executable(citra-qt ${SRCS} ${HEADERS} ${UI_HDRS})
+    add_executable(citra-qt ${SRCS} ${HEADERS} ${UI_HDRS} ${RESOURCE_HDRS})
 endif()
 target_link_libraries(citra-qt core video_core common qhexedit)
 target_link_libraries(citra-qt ${OPENGL_gl_LIBRARY} ${CITRA_QT_LIBS})

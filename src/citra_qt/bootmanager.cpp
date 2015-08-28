@@ -82,12 +82,20 @@ class GGLWidgetInternal : public QGLWidget
 {
 public:
     GGLWidgetInternal(QGLFormat fmt, GRenderWindow* parent)
-                     : QGLWidget(fmt, parent), parent(parent) {
+                     : QGLWidget(fmt, parent), splash(":/data/citra.svg"), parent(parent) {
     }
 
     void paintEvent(QPaintEvent* ev) override {
         if (do_painting) {
             QPainter painter(this);
+
+            int scaled_width = width()/3;
+            int scaled_height = width()/3;
+
+            painter.drawImage(QRect(width()/2-scaled_width/2,
+                                    height()/2-scaled_height/2,
+                                    scaled_width,
+                                    scaled_height), splash);
         }
     }
 
@@ -101,6 +109,7 @@ public:
 
 private:
     GRenderWindow* parent;
+    QImage splash;
     bool do_painting;
 };
 
@@ -116,7 +125,7 @@ GRenderWindow::GRenderWindow(QWidget* parent, EmuThread* emu_thread) :
     // TODO: One of these flags might be interesting: WA_OpaquePaintEvent, WA_NoBackground, WA_DontShowOnScreen, WA_DeleteOnClose
     QGLFormat fmt;
     fmt.setVersion(3,2);
-    fmt.setProfile(QGLFormat::CoreProfile);
+    //fmt.setProfile(QGLFormat::CoreProfile);
     // Requests a forward-compatible context, which is required to get a 3.2+ context on OS X
     fmt.setOption(QGL::NoDeprecatedFunctions);
 
