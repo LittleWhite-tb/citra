@@ -82,21 +82,10 @@ class GGLWidgetInternal : public QGLWidget
 {
 public:
     GGLWidgetInternal(QGLFormat fmt, GRenderWindow* parent)
-                     : QGLWidget(fmt, parent), splash(":/data/citra.svg"), parent(parent) {
+                     : QGLWidget(fmt, parent), parent(parent) {
     }
 
     void paintEvent(QPaintEvent* ev) override {
-        if (do_painting) {
-            QPainter painter(this);
-
-            int scaled_width = width()/3;
-            int scaled_height = width()/3;
-
-            painter.drawImage(QRect(width()/2-scaled_width/2,
-                                    height()/2-scaled_height/2,
-                                    scaled_width,
-                                    scaled_height), splash);
-        }
     }
 
     void resizeEvent(QResizeEvent* ev) override {
@@ -104,13 +93,31 @@ public:
         parent->OnFramebufferSizeChanged();
     }
 
-    void DisablePainting() { do_painting = false; }
-    void EnablePainting() { do_painting = true; }
-
 private:
     GRenderWindow* parent;
+};
+
+class GSplashWidgetInternal : public QWidget
+{
+public:
+    GSplashWidgetInternal(QWidget* parent)
+                     : QWidget(parent), splash(":/data/citra.svg") {
+    }
+
+    void paintEvent(QPaintEvent* ev) override {
+        QPainter painter(this);
+
+        int scaled_width = width()/3;
+        int scaled_height = width()/3;
+
+        painter.drawImage(QRect(width()/2-scaled_width/2,
+                                height()/2-scaled_height/2,
+                                scaled_width,
+                                scaled_height), splash);
+    }
+
+private:
     QImage splash;
-    bool do_painting;
 };
 
 GRenderWindow::GRenderWindow(QWidget* parent, EmuThread* emu_thread) :
@@ -125,22 +132,26 @@ GRenderWindow::GRenderWindow(QWidget* parent, EmuThread* emu_thread) :
     // TODO: One of these flags might be interesting: WA_OpaquePaintEvent, WA_NoBackground, WA_DontShowOnScreen, WA_DeleteOnClose
     QGLFormat fmt;
     fmt.setVersion(3,2);
-    //fmt.setProfile(QGLFormat::CoreProfile);
+    fmt.setProfile(QGLFormat::CoreProfile);
     // Requests a forward-compatible context, which is required to get a 3.2+ context on OS X
     fmt.setOption(QGL::NoDeprecatedFunctions);
 
-    child = new GGLWidgetInternal(fmt, this);
-    QBoxLayout* layout = new QHBoxLayout(this);
+    render_widget = new GGLWidgetInternal(fmt, this);
+    splash_widget = new GSplashWidgetInternal(this);
+    layout = new QHBoxLayout(this);
 
     resize(VideoCore::kScreenTopWidth, VideoCore::kScreenTopHeight + VideoCore::kScreenBottomHeight);
-    layout->addWidget(child);
+    layout->addWidget(splash_widget);
     layout->setMargin(0);
     setLayout(layout);
+
+    active_widget = splash_widget;
+    render_widget->hide(); // By default, widget are shown. Hide the inactive one for the moment.
 
     OnMinimalClientAreaChangeRequest(GetActiveConfig().min_client_area_size);
 
     OnFramebufferSizeChanged();
-    NotifyClientAreaSizeChanged(std::pair<unsigned,unsigned>(child->width(), child->height()));
+    NotifyClientAreaSizeChanged(std::pair<unsigned,unsigned>(active_widget->width(), active_widget->height()));
 
     BackupGeometry();
 
@@ -156,7 +167,7 @@ void GRenderWindow::moveContext()
 #if QT_VERSION > QT_VERSION_CHECK(5, 0, 0)
     // If the thread started running, move the GL Context to the new thread. Otherwise, move it back.
     auto thread = (QThread::currentThread() == qApp->thread() && emu_thread != nullptr) ? emu_thread : qApp->thread();
-    child->context()->moveToThread(thread);
+    render_widget->context()->moveToThread(thread);
 #endif
 }
 
@@ -167,19 +178,19 @@ void GRenderWindow::SwapBuffers()
     // since the last time you called swapBuffers. This presumably means something if you're using
     // QGLWidget the "regular" way, but in our multi-threaded use case is harmless since we never
     // call doneCurrent in this thread.
-    child->makeCurrent();
+    render_widget->makeCurrent();
 #endif
-    child->swapBuffers();
+    render_widget->swapBuffers();
 }
 
 void GRenderWindow::MakeCurrent()
 {
-    child->makeCurrent();
+    render_widget->makeCurrent();
 }
 
 void GRenderWindow::DoneCurrent()
 {
-    child->doneCurrent();
+    render_widget->doneCurrent();
 }
 
 void GRenderWindow::PollEvents() {
@@ -197,11 +208,11 @@ void GRenderWindow::OnFramebufferSizeChanged()
     // windowHandle() might not be accessible until the window is displayed to screen.
     auto pixel_ratio = windowHandle() ? (windowHandle()->screen()->devicePixelRatio()) : 1.0;
 
-    unsigned width = child->QPaintDevice::width() * pixel_ratio;
-    unsigned height = child->QPaintDevice::height() * pixel_ratio;
+    unsigned width = active_widget->QPaintDevice::width() * pixel_ratio;
+    unsigned height = active_widget->QPaintDevice::height() * pixel_ratio;
 #else
-    unsigned width = child->QPaintDevice::width();
-    unsigned height = child->QPaintDevice::height();
+    unsigned width = active_widget->QPaintDevice::width();
+    unsigned height = active_widget->QPaintDevice::height();
 #endif
 
     NotifyFramebufferLayoutChanged(EmuWindow::FramebufferLayout::DefaultScreenLayout(width, height));
@@ -284,10 +295,22 @@ void GRenderWindow::OnMinimalClientAreaChangeRequest(const std::pair<unsigned,un
 
 void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {
     this->emu_thread = emu_thread;
-    child->DisablePainting();
+
+    // Swaps to put in front the render widget
+    active_widget=render_widget;
+    layout->removeWidget(splash_widget);
+    layout->addWidget(render_widget);
+    render_widget->show();
+    splash_widget->hide();
 }
 
 void GRenderWindow::OnEmulationStopping() {
     emu_thread = nullptr;
-    child->EnablePainting();
+
+    // Swaps back the splash widget
+    active_widget=splash_widget;
+    layout->removeWidget(render_widget);
+    layout->addWidget(splash_widget);
+    splash_widget->show();
+    render_widget->hide();
 }

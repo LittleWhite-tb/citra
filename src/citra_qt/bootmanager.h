@@ -12,10 +12,10 @@
 #include "common/emu_window.h"
 #include "common/thread.h"
 
+class QBoxLayout;
 class QKeyEvent;
 class QScreen;
 
-class GGLWidgetInternal;
 class GMainWindow;
 class GRenderWindow;
 
@@ -133,7 +133,11 @@ public slots:
 private:
     void OnMinimalClientAreaChangeRequest(const std::pair<unsigned,unsigned>& minimal_size) override;
 
-    GGLWidgetInternal* child;
+    QBoxLayout* layout;
+    QWidget* active_widget;
+    QGLWidget* render_widget;
+    QWidget* splash_widget;
+
 
     QByteArray geometry;
 

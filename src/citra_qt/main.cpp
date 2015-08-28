@@ -59,7 +59,6 @@ GMainWindow::GMainWindow() : emu_thread(nullptr)
     statusBar()->hide();
 
     render_window = new GRenderWindow(this, emu_thread.get());
-    render_window->hide();
 
     profilerWidget = new ProfilerWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, profilerWidget);
@@ -291,7 +290,6 @@ void GMainWindow::ShutdownGame() {
     ui.action_Start->setText(tr("Start"));
     ui.action_Pause->setEnabled(false);
     ui.action_Stop->setEnabled(false);
-    render_window->hide();
 }
 
 void GMainWindow::StoreRecentFile(const QString& filename)
