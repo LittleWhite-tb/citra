@@ -78,7 +78,7 @@ void EmuThread::run() {
 
 // This class overrides paintEvent and resizeEvent to prevent the GUI thread from stealing GL context.
 // The corresponding functionality is handled in EmuThread instead
-class GGLWidgetInternal : public QGLWidget
+class GGLWidgetInternal final : public QGLWidget
 {
 public:
     GGLWidgetInternal(QGLFormat fmt, GRenderWindow* parent)
@@ -97,7 +97,7 @@ private:
     GRenderWindow* parent;
 };
 
-class GSplashWidgetInternal : public QWidget
+class GSplashWidgetInternal final : public QWidget
 {
 public:
     GSplashWidgetInternal(QWidget* parent)
@@ -296,7 +296,7 @@ void GRenderWindow::OnMinimalClientAreaChangeRequest(const std::pair<unsigned,un
 void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {
     this->emu_thread = emu_thread;
 
-    // Swaps to put in front the render widget
+    // Put render widget in front
     active_widget=render_widget;
     layout->removeWidget(splash_widget);
     layout->addWidget(render_widget);
@@ -307,7 +307,7 @@ void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {
 void GRenderWindow::OnEmulationStopping() {
     emu_thread = nullptr;
 
-    // Swaps back the splash widget
+    // Put splash widget in front
     active_widget=splash_widget;
     layout->removeWidget(render_widget);
     layout->addWidget(splash_widget);
