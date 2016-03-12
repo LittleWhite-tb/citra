@@ -24,6 +24,9 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="focusPolicy">
+    <enum>Qt::StrongFocus</enum>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="leftMargin">
      <number>0</number>
@@ -172,12 +175,12 @@
    </property>
   </action>
   <action name="action_Use_Gdbstub">
-    <property name="checkable">
-      <bool>true</bool>
-    </property>
-    <property name="text">
-      <string>Use Gdbstub</string>
-    </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Gdbstub</string>
+   </property>
   </action>
   <action name="action_Configure">
    <property name="text">

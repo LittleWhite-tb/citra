@@ -197,6 +197,8 @@ GMainWindow::GMainWindow() : emu_thread(nullptr)
     connect(this, SIGNAL(EmulationStarting(EmuThread*)), graphicsTracingWidget, SLOT(OnEmulationStarting(EmuThread*)));
     connect(this, SIGNAL(EmulationStopping()), graphicsTracingWidget, SLOT(OnEmulationStopping()));
 
+    connect(render_window, SIGNAL(gotFocus()), this, SLOT(OnStartGame()));
+    connect(render_window, SIGNAL(lostFocus()), this, SLOT(OnPauseGame()));
 
     // Setup hotkeys
     RegisterHotkey("Main Window", "Load File", QKeySequence::Open);
@@ -483,6 +485,8 @@ void GMainWindow::OnStartGame() {
 
     ui.action_Pause->setEnabled(true);
     ui.action_Stop->setEnabled(true);
+
+    render_window->setFocus();
 }
 
 void GMainWindow::OnPauseGame() {
@@ -527,7 +531,7 @@ void GMainWindow::ToggleWindowMode() {
         // Render in the main window...
         render_window->BackupGeometry();
         ui.horizontalLayout->addWidget(render_window);
-        render_window->setFocusPolicy(Qt::ClickFocus);
+        render_window->setFocusPolicy(Qt::StrongFocus);
         if (emulation_running) {
             render_window->setVisible(true);
             render_window->setFocus();
@@ -545,6 +549,7 @@ void GMainWindow::ToggleWindowMode() {
             game_list->show();
         }
     }
+    render_window->setFocus();
 }
 
 void GMainWindow::OnConfigure() {

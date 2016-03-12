@@ -282,6 +282,14 @@ void GRenderWindow::OnMinimalClientAreaChangeRequest(const std::pair<unsigned,un
     setMinimumSize(minimal_size.first, minimal_size.second);
 }
 
+void GRenderWindow::focusInEvent(QFocusEvent*) {
+    if (emu_thread) emit gotFocus();
+}
+
+void GRenderWindow::focusOutEvent(QFocusEvent*) {
+    if (emu_thread) emit lostFocus();
+}
+
 void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {
     this->emu_thread = emu_thread;
     child->DisablePainting();
