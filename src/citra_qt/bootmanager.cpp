@@ -9,6 +9,7 @@
 #endif
 
 #include "citra_qt/bootmanager.h"
+#include "citra_qt/ui_settings.h"
 
 #include "common/key_map.h"
 #include "common/microprofile.h"
@@ -283,6 +284,14 @@ void GRenderWindow::OnClientAreaResized(unsigned width, unsigned height)
 
 void GRenderWindow::OnMinimalClientAreaChangeRequest(const std::pair<unsigned,unsigned>& minimal_size) {
     setMinimumSize(minimal_size.first, minimal_size.second);
+}
+
+void GRenderWindow::focusInEvent(QFocusEvent*) {
+    if (emu_thread && UISettings::values.pause_onfocuslost) emit gotFocus();
+}
+
+void GRenderWindow::focusOutEvent(QFocusEvent*) {
+    if (emu_thread && UISettings::values.pause_onfocuslost) emit lostFocus();
 }
 
 void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {
