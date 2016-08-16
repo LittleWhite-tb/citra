@@ -150,6 +150,10 @@ int main(int argc, char **argv) {
 
     while (emu_window->IsOpen()) {
         Core::RunLoop();
+
+        // Pause on focus lost
+        if (!emu_window->HasFocus())
+            emu_window->WaitForFocus();
     }
 
     return 0;

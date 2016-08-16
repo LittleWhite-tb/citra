@@ -30,6 +30,12 @@ public:
     /// Whether the window is still open, and a close request hasn't yet been sent
     bool IsOpen() const;
 
+    /// Whether the window has focus
+    bool HasFocus() const;
+
+    /// Wait for the window to gain focus
+    void WaitForFocus();
+
     /// Load keymap from configuration
     void ReloadSetKeymaps() override;
 
@@ -51,6 +57,9 @@ private:
 
     /// Is the window still open?
     bool is_open = true;
+
+    /// Is the window has focus
+    bool has_focus = true;
 
     /// Internal SDL2 render window
     SDL_Window* render_window;
