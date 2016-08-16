@@ -98,6 +98,8 @@ private slots:
     void OnStartGame();
     void OnPauseGame();
     void OnStopGame();
+    /// Called whenever the render window focus is changed
+    void OnFocusChanged(bool hasFocus);
     /// Called whenever a user selects a game in the game list widget.
     void OnGameListLoadFile(QString game_path);
     void OnMenuLoadFile();
@@ -118,6 +120,8 @@ private:
 
     std::unique_ptr<Config> config;
 
+    // Whether emulation has been paused (through menus)
+    bool emulation_paused = false;
     // Whether emulation is currently running in Citra.
     bool emulation_running = false;
     std::unique_ptr<EmuThread> emu_thread;

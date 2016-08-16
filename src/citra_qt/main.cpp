@@ -186,8 +186,7 @@ GMainWindow::GMainWindow() : config(new Config()), emu_thread(nullptr)
     connect(this, SIGNAL(EmulationStarting(EmuThread*)), graphicsTracingWidget, SLOT(OnEmulationStarting(EmuThread*)));
     connect(this, SIGNAL(EmulationStopping()), graphicsTracingWidget, SLOT(OnEmulationStopping()));
 
-    connect(render_window, SIGNAL(gotFocus()), this, SLOT(OnStartGame()));
-    connect(render_window, SIGNAL(lostFocus()), this, SLOT(OnPauseGame()));
+    connect(render_window, SIGNAL(focusChanged(bool)), this, SLOT(OnFocusChanged(bool)));
 
     // Setup hotkeys
     RegisterHotkey("Main Window", "Load File", QKeySequence::Open);
@@ -472,6 +471,8 @@ void GMainWindow::OnStartGame() {
     ui.action_Stop->setEnabled(true);
 
     render_window->setFocus();
+
+    emulation_paused = false;
 }
 
 void GMainWindow::OnPauseGame() {
@@ -480,10 +481,28 @@ void GMainWindow::OnPauseGame() {
     ui.action_Start->setEnabled(true);
     ui.action_Pause->setEnabled(false);
     ui.action_Stop->setEnabled(true);
+
+    emulation_paused = true;
 }
 
 void GMainWindow::OnStopGame() {
     ShutdownGame();
+}
+
+void GMainWindow::OnFocusChanged(bool hasFocus) {
+    // The focus change does not impact actual emulator state if:
+    // - the option is disabled
+    // - the emulation is not started
+    // - the emulation has been paused through menu
+    if(!UISettings::values.pause_onfocuslost ||
+       !emu_thread ||
+       emulation_paused)
+        return;
+
+    if (hasFocus)
+        emu_thread->SetRunning(true);
+    else // focus lost
+        emu_thread->SetRunning(false);
 }
 
 void GMainWindow::ToggleWindowMode() {
@@ -521,6 +540,10 @@ void GMainWindow::OnConfigure() {
         render_window->ReloadSetKeymaps();
         config->Save();
     }
+
+    // Make sure the emulation is running when all pauses are disabled
+    if (emu_thread && !UISettings::values.pause_onfocuslost && !emulation_paused)
+        emu_thread->SetRunning(true);
 }
 
 void GMainWindow::OnCreateGraphicsSurfaceViewer() {

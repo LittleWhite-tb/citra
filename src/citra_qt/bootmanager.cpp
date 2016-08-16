@@ -137,7 +137,6 @@ GRenderWindow::GRenderWindow(QWidget* parent, EmuThread* emu_thread) :
     NotifyClientAreaSizeChanged(std::pair<unsigned,unsigned>(child->width(), child->height()));
 
     BackupGeometry();
-
 }
 
 void GRenderWindow::moveContext()
@@ -287,11 +286,11 @@ void GRenderWindow::OnMinimalClientAreaChangeRequest(const std::pair<unsigned,un
 }
 
 void GRenderWindow::focusInEvent(QFocusEvent*) {
-    if (emu_thread && UISettings::values.pause_onfocuslost) emit gotFocus();
+    emit focusChanged(true);
 }
 
 void GRenderWindow::focusOutEvent(QFocusEvent*) {
-    if (emu_thread && UISettings::values.pause_onfocuslost) emit lostFocus();
+    emit focusChanged(false);
 }
 
 void GRenderWindow::OnEmulationStarting(EmuThread* emu_thread) {

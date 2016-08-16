@@ -136,10 +136,8 @@ public slots:
 signals:
     /// Emitted when the window is closed
     void Closed();
-    /// Emitted when the window got focus
-    void gotFocus();
-    /// Emitted when the window lost focus
-    void lostFocus();
+    /// Emitted when the window focus changed
+    void focusChanged(bool hasFocus);
 
 private:
     void OnMinimalClientAreaChangeRequest(const std::pair<unsigned,unsigned>& minimal_size) override;
