@@ -99,7 +99,7 @@ private slots:
     void OnPauseGame();
     void OnStopGame();
     /// Called whenever the render window focus is changed
-    void OnFocusChanged(bool hasFocus);
+    void OnFocusChanged(bool has_focus);
     /// Called whenever a user selects a game in the game list widget.
     void OnGameListLoadFile(QString game_path);
     void OnMenuLoadFile();

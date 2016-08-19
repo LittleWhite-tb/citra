@@ -116,7 +116,7 @@ void Config::ReadValues() {
 
     UISettings::values.single_window_mode = qt_config->value("singleWindowMode", true).toBool();
     UISettings::values.display_titlebar = qt_config->value("displayTitleBars", true).toBool();
-    UISettings::values.pause_onfocuslost = qt_config->value("pauseOnFocusLost",false).toBool();
+    UISettings::values.pause_onfocuslost = qt_config->value("pauseOnFocusLost", false).toBool();
     UISettings::values.confirm_before_closing = qt_config->value("confirmClose",true).toBool();
     UISettings::values.first_start = qt_config->value("firstStart", true).toBool();
 

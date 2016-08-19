@@ -489,20 +489,17 @@ void GMainWindow::OnStopGame() {
     ShutdownGame();
 }
 
-void GMainWindow::OnFocusChanged(bool hasFocus) {
+void GMainWindow::OnFocusChanged(bool has_focus) {
     // The focus change does not impact actual emulator state if:
     // - the option is disabled
     // - the emulation is not started
     // - the emulation has been paused through menu
-    if(!UISettings::values.pause_onfocuslost ||
-       !emu_thread ||
-       emulation_paused)
+    if (!UISettings::values.pause_onfocuslost ||
+        !emu_thread ||
+        emulation_paused)
         return;
 
-    if (hasFocus)
-        emu_thread->SetRunning(true);
-    else // focus lost
-        emu_thread->SetRunning(false);
+    emu_thread->SetRunning(has_focus);
 }
 
 void GMainWindow::ToggleWindowMode() {

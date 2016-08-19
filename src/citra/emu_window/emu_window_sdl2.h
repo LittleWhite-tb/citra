@@ -58,7 +58,7 @@ private:
     /// Is the window still open?
     bool is_open = true;
 
-    /// Is the window has focus
+    /// Does the window has focus
     bool has_focus = true;
 
     /// Internal SDL2 render window

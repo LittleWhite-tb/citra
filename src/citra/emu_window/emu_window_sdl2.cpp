@@ -63,16 +63,16 @@ void EmuWindow_SDL2::OnResize() {
 }
 
 void EmuWindow_SDL2::WaitForFocus() {
-    while(!has_focus) {
+    while (!has_focus) {
         SDL_Event event;
         SDL_WaitEvent(&event);
-        if(event.type == SDL_WINDOWEVENT) {
+        if (event.type == SDL_WINDOWEVENT) {
             switch (event.window.event) {
             case SDL_WINDOWEVENT_FOCUS_GAINED:
-                has_focus=true;
+                has_focus = true;
                 break;
             case SDL_WINDOWEVENT_CLOSE:
-                has_focus=true;
+                has_focus = true;
                 is_open = false;
                 break;
             }
